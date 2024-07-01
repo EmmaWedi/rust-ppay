@@ -1,0 +1,49 @@
+[env]
+environment = "TEST"
+
+[app]
+name = "PeoplesPay-Rust"
+port = 3500
+host = "0.0.0.0"
+
+[network]
+behind_proxy = false
+
+[pg]
+user = "postgres"
+password = "Q2eywi5dpX1nciNj906faYHGXoWUhR1R"
+host = "127.0.0.1"
+port = 5432
+dbname = "postgres"
+connect_timeout = 60
+idle_timeout = 5
+max = 1000
+
+[mongo]
+DB_HOST = "0.0.0.0"
+DB_HOST_LOCAL = "0.0.0.0"
+MONGO_DB_USERNAME = "admin"
+MONGO_DB_PASSWORD = "password"
+PORT = "27017"
+DB_NAME = "PeoplesPay"
+
+[redis]
+host = "127.0.0.1"
+port = 6379
+password = "CCq2Si39hdgY6ajP5vHL"
+db = 0
+pool_get_timeout_seconds = 10
+pool_max_open = 100
+pool_max_idle = 8
+pool_max_lifetime_seconds = 60
+
+[aes]
+aes_key = "e3Ui2PBkyFl5vUaO"
+
+[base]
+base_str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+[jwt]
+access_expire = 7200
+refresh_expire = 604800
+secret_key = "TmeAdY8DIvUaJTkcMaVpJ8dUjIXN6qHosyGTULWhlVXfEvH6XKnDY1HzGVH64y00"
