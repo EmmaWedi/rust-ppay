@@ -1,4 +1,6 @@
-use actix_web::{web, HttpRequest};
+use std::sync::Arc;
+
+use actix_web::{web, HttpMessage, HttpRequest};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -8,21 +10,18 @@ use rand::distributions::Alphanumeric;
 use crate::libs::error;
 use crate::AppState;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
     pub iat: usize,
     pub exp: usize,
     pub jid: String,
     pub roles: Vec<String>,
-    pub sub: String,
+    pub id: String,
+    pub _id: String,
 }
 
 pub struct Token {
     pub token: String
-}
-
-pub fn salt() -> uuid::Uuid {
-    uuid::Uuid::new_v4()
 }
 
 fn gen_string(size: usize) -> String {
@@ -33,7 +32,7 @@ fn gen_string(size: usize) -> String {
         .collect()
 }
 
-pub async fn create_jwt(user_id: i32, user_type: String, state: &web::Data<AppState>) -> Token {
+pub async fn create_jwt(user_id: String, user_type: String, state: &web::Data<AppState>) -> Token {
 
     let expire = state.config.get::<i64>("jwt.access_expire").unwrap();
 
@@ -44,15 +43,14 @@ pub async fn create_jwt(user_id: i32, user_type: String, state: &web::Data<AppSt
     let created = Utc::now();
     let expiry = Utc::now() + Duration::seconds(expire);
     let jid = uuid::Uuid::new_v4();
-    let ran_str = gen_string(32);
-    let sub = format!("{}/{}", user_id, ran_str);
 
     let claim = Claims {
         iat: created.timestamp() as usize,
         exp: expiry.timestamp() as usize,
         jid: jid.to_string(),
         roles,
-        sub
+        id: user_id,
+        _id: gen_string(32)
     };
 
     let token = encode(&Header::new(Algorithm::HS256), &claim, &EncodingKey::from_secret(jwt_key.as_ref())).unwrap();
@@ -96,8 +94,8 @@ pub async fn verify_jwt(req: &HttpRequest, state: &web::Data<AppState>) -> Resul
     };
 
     let claims = parse_token(&token, state)?;
-
-    //add user id confirmation here
+    
+    req.extensions_mut().insert(Arc::new(claims.clone()));
 
     Ok(claims)
 }

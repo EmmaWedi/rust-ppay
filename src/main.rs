@@ -74,7 +74,8 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(Logger::default())
             .wrap(cors)
-            .route("/api/v1/engine", web::get().to(|| async { "Engine Running" }))
+            .configure(app::customers::routes::route::route)
+            .configure(app::health::routes::route::route)
     })
     .bind(format!("{}:{}", _host, _port))?
     .run()
