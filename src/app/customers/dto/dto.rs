@@ -25,7 +25,8 @@ pub async fn create_customer_dto(state: &web::Data<AppState>, add_customer_model
         updated_at: mongodb::bson::DateTime::now(),
         last_seen: None,
         profile: "subscriber".to_string(),
-        salt: add_customer_model.salt
+        salt: add_customer_model.salt,
+        session_id: add_customer_model.session
     };
 
     let result = state

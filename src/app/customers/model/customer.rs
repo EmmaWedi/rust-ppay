@@ -17,6 +17,7 @@ pub struct CustomerModel {
     pub phone: String,
     pub password: String,
     pub salt: String,
+    pub session_id: String,
     
     #[serde(default = "default_false")]
     pub phone_verified: bool,
@@ -62,6 +63,7 @@ pub struct AddCustomerModel {
     pub phone: String,
     pub password: String,
     pub salt: String,
+    pub session: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -96,4 +98,9 @@ pub struct HttpClientSuccessResponse<T> {
     pub status: bool,
     pub message: String,
     pub data: Vec<T>
+}
+
+pub struct SiginCustomerModel {
+    pub email: String,
+    pub password: String
 }

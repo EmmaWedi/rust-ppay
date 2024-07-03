@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse};
 
-use crate::{app::customers::{dto::dto::create_customer_dto, model::customer::{AddCustomerModel, AddCustomerRequestModel, AddCustomerResponseModel, HttpClientErrorResponse }}, libs::{error, util::{encrypt_password, salt}, validator}, AppState};
+use crate::{app::customers::{dto::dto::create_customer_dto, model::customer::{AddCustomerModel, AddCustomerRequestModel, AddCustomerResponseModel, HttpClientErrorResponse, SiginCustomerModel }}, libs::{error, jwt::create_jwt, util::{encrypt_password, salt}, validator}, AppState};
 
 pub async fn create_customer(payload: web::Json<AddCustomerRequestModel>, state: web::Data<AppState>) -> Result<HttpResponse, error::Error> {
     let firstname = validator::required_str(&payload.firstname, "First Name")?;
@@ -18,7 +18,8 @@ pub async fn create_customer(payload: web::Json<AddCustomerRequestModel>, state:
         email,
         phone: mobile,
         password: hash_password,
-        salt: salt.to_string()
+        salt: salt.to_string(),
+        session: uuid::Uuid::new_v4().to_string()
     };
 
     let result = create_customer_dto(&state, data).await;
@@ -26,14 +27,12 @@ pub async fn create_customer(payload: web::Json<AddCustomerRequestModel>, state:
     match result {
         Ok(res) => {
             let _id = res.inserted_id.to_string();
-
-            log::info!("{:?}", res);
             
-            let token = "generated_token".to_string();
+            let token_addr = create_jwt(_id.clone(), "user".to_string(), &state).await;
 
             Ok(HttpResponse::Ok().json(AddCustomerResponseModel {
                 id: _id,
-                token,
+                token: token_addr.token,
                 code: 2000,
                 status: true,
                 message: "Success".to_string(),
@@ -49,4 +48,8 @@ pub async fn create_customer(payload: web::Json<AddCustomerRequestModel>, state:
             }))
         }
     }
+}
+
+pub async fn signin_customer() -> Result<HttpResponse, error::Error> {
+    Ok(HttpResponse::Ok().body("Working"))
 }

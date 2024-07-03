@@ -1,2 +1,2 @@
-pub mod customers;
 pub mod health;
+pub mod customers;

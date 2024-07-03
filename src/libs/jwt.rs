@@ -53,7 +53,7 @@ pub async fn create_jwt(user_id: String, user_type: String, state: &web::Data<Ap
         _id: gen_string(32)
     };
 
-    let token = encode(&Header::new(Algorithm::HS256), &claim, &EncodingKey::from_secret(jwt_key.as_ref())).unwrap();
+    let token = encode(&Header::new(Algorithm::HS512), &claim, &EncodingKey::from_secret(jwt_key.as_ref())).unwrap();
 
     Token {
         token

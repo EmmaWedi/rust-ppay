@@ -1,4 +1,4 @@
-use sha2::{Digest, Sha256};
+use sha2::{Digest, Sha512};
 
 pub fn salt() -> uuid::Uuid {
     uuid::Uuid::new_v4()
@@ -12,7 +12,7 @@ pub fn encrypt_password(password: &str, _salt: &uuid::Uuid) -> String {
 
     let pwd = format!("{:?}{}{}", pwd, password, _salt.to_string());
 
-    let pwd = Sha256::new().chain_update(pwd).finalize();
+    let pwd = Sha512::new().chain_update(pwd).finalize();
     
     format!("{:x}", pwd)
 }

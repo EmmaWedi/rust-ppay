@@ -56,7 +56,7 @@ pub fn render_404<B>(mut res: dev::ServiceResponse<B>) -> Result<ErrorHandlerRes
     );
 
     let new_res = res.map_body(|_, _| {
-        EitherBody::left(BoxBody::new("{\"error_code\": 404, \"error_msg\": \"Not Found\"}"))
+        EitherBody::left(BoxBody::new("{\"error_code\": 404, \"error_msg\": \"Not Found\", \"error_status\": 2002 }"))
     });
     Ok(ErrorHandlerResponse::Response(new_res))
 }
