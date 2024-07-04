@@ -1,7 +1,7 @@
 use actix_web::web;
 use mongodb::{error::Error, results::InsertOneResult};
 
-use crate::{app::customers::model::customer::{AddCustomerModel, CustomerModel}, AppState};
+use crate::{app::customers::model::{customer::CustomerModel, customer_types::AddCustomerModel}, AppState};
 
 pub async fn create_customer_dto(state: &web::Data<AppState>, add_customer_model: AddCustomerModel) -> Result<InsertOneResult, Error> {
 
