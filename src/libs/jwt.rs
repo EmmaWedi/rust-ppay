@@ -1,6 +1,4 @@
-use std::sync::Arc;
-
-use actix_web::{web, HttpMessage, HttpRequest};
+use actix_web::{web, HttpRequest};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -92,8 +90,6 @@ pub async fn verify_jwt(req: &HttpRequest, state: &web::Data<AppState>) -> Resul
     };
 
     let claims = parse_token(&token, state)?;
-    
-    req.extensions_mut().insert(Arc::new(claims.clone()));
 
     Ok(claims)
 }

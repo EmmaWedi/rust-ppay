@@ -2,7 +2,7 @@ setup:
 	cargo init
 
 install:
-	cargo add actix-web actix-http chrono futures-util mongodb actix-cors jsonwebtoken config uuid redis regex rand reqwest anyhow env_logger log serde_json sha2 md5 cbc base64
+	cargo add actix-web actix-http chrono futures-util futures mongodb actix-cors jsonwebtoken config uuid redis regex rand reqwest anyhow env_logger log serde_json sha2 md5 cbc base64
 	cargo add serde --features derive
 
 run:

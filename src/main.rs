@@ -10,6 +10,7 @@ use libs::error;
 mod setup;
 mod libs;
 mod app;
+mod middlewares;
 
 #[derive(Clone)]
 pub struct AppState {
