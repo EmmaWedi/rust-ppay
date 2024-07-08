@@ -15,7 +15,7 @@ pub struct Claims {
     pub iat: usize,
     pub exp: usize,
     pub jid: String,
-    pub roles: Vec<String>,
+    pub roles: String,
     pub id: String,
     pub _id: String,
 }
@@ -38,8 +38,6 @@ pub async fn create_jwt(user_id: String, user_type: String, state: &web::Data<Ap
 
     let jwt_key = state.config.get::<String>("jwt.secret_key").unwrap();
 
-    let roles: Vec<String> = vec![user_type];
-
     let created = Utc::now();
     let expiry = Utc::now() + Duration::seconds(expire);
     let jid = uuid::Uuid::new_v4();
@@ -48,7 +46,7 @@ pub async fn create_jwt(user_id: String, user_type: String, state: &web::Data<Ap
         iat: created.timestamp() as usize,
         exp: expiry.timestamp() as usize,
         jid: jid.to_string(),
-        roles,
+        roles: user_type,
         id: user_id,
         _id: gen_string(32)
     };

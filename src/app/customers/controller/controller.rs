@@ -2,16 +2,15 @@ use actix_web::{web, HttpResponse};
 
 use crate::{
     app::customers::{
-        dto::dto::create_customer_dto,
+        dto::dto::{create_customer_dto, get_customer_by_email, update_session},
         model::customer_types::{
-            AddCustomerModel, AddCustomerRequestModel, AddCustomerResponseModel,
-            HttpClientErrorResponse,
+            AddCustomerModel, AddCustomerRequestModel, AddCustomerResponseModel, CustomerToReturnModel, HttpClientErrorResponse, SiginCustomerRequestModel
         },
     },
     libs::{
         error,
         jwt::create_jwt,
-        util::{encrypt_password, salt},
+        util::{encrypt_password, parse_uuid, salt, validate_password},
         validator,
     },
     AppState,
@@ -27,8 +26,18 @@ pub async fn create_customer(
     let lastname = validator::required_str(&payload.lastname, "Last Name")?;
     let mobile = validator::mobile(&payload.phone, "Phone")?;
 
+    if let Ok(customer) = get_customer_by_email(&state, &email).await {
+        return Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
+            code: 2002,
+            status: false,
+            message: format!("Customer With Email {} Exists", customer.email),
+            data: vec![],
+        }));
+    }
+
     let salt = salt();
     let hash_password = encrypt_password(&password, &salt);
+    let session = uuid::Uuid::new_v4().to_string();
 
     let data = AddCustomerModel {
         firstname,
@@ -37,19 +46,18 @@ pub async fn create_customer(
         phone: mobile,
         password: hash_password,
         salt: salt.to_string(),
-        session: uuid::Uuid::new_v4().to_string(),
+        session: session.clone(),
     };
 
     let result = create_customer_dto(&state, data).await;
 
     match result {
         Ok(res) => {
-            let _id = res.inserted_id.to_string();
 
-            let token_addr = create_jwt(_id.clone(), "user".to_string(), &state).await;
+            let token_addr = create_jwt(session.clone(), "user".to_string(), &state).await;
 
             Ok(HttpResponse::Ok().json(AddCustomerResponseModel {
-                id: _id,
+                id: session,
                 token: token_addr.token,
                 code: 2000,
                 status: true,
@@ -57,15 +65,71 @@ pub async fn create_customer(
                 data: vec![res],
             }))
         }
-        Err(e) => Ok(HttpResponse::BadRequest().json(HttpClientErrorResponse {
+        Err(e) => Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
             code: 2002,
             status: false,
-            message: e.to_string(),
+            message: "Could not register".to_string(),
             data: vec![],
         })),
     }
 }
 
-pub async fn signin_customer() -> Result<HttpResponse, error::Error> {
-    Ok(HttpResponse::Ok().body("Working"))
+pub async fn signin_customer(
+    payload: web::Json<SiginCustomerRequestModel>,
+    state: web::Data<AppState>,
+) -> Result<HttpResponse, error::Error> {
+    let password = validator::required_str(&payload.password, "Password")?;
+    let email = validator::email(&payload.email, "Email")?;
+
+    match get_customer_by_email(&state, &email).await {
+        Ok(customer) => {
+            let salt = parse_uuid(&customer.salt);
+
+            let session = uuid::Uuid::new_v4().to_string();
+
+            let valid_password = validate_password(&password, &salt, &customer.password);
+
+            if !valid_password {
+                return Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
+                    code: 2002,
+                    status: false,
+                    message: "Invalid Credentials".to_string(),
+                    data: vec![],
+                }));
+            }
+
+            let _ = update_session(&state, session.clone(), customer._id).await;
+
+            let token_addr = create_jwt(session.clone(), "user".to_string(), &state).await;
+
+            let cus = CustomerToReturnModel {
+                first_name: customer.first_name,
+                last_name: customer.last_name,
+                email: customer.email,
+                phone: customer.phone,
+                referal_code: customer.referal_code,
+                profile: customer.profile,
+                email_verified: customer.email_verified,
+                phone_verified: customer.phone_verified,
+                is_subscribed_on_bvirtual: customer.is_subscribed_on_bvirtual,
+                is_account_active: customer.is_account_active,
+                last_seen: customer.last_seen.to_string()
+            };
+
+            Ok(HttpResponse::Ok().json(AddCustomerResponseModel {
+                id: session,
+                token: token_addr.token,
+                code: 2000,
+                status: true,
+                message: "Success".to_string(),
+                data: vec![cus],
+            }))
+        }
+        Err(e) => Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
+            code: 2002,
+            status: false,
+            message: "Wrong Credentials".to_string(),
+            data: vec![],
+        })),
+    }
 }

@@ -6,6 +6,6 @@ pub fn route(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api/v1/customers")
             .route("/register", web::post().to(create_customer))
-            .route("/login", web::get().to(signin_customer)),
+            .route("/login", web::post().to(signin_customer))
     );
 }

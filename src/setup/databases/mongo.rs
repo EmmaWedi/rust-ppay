@@ -7,7 +7,6 @@ pub struct MongoDatabase {
     pub customers: Collection<CustomerModel>
 }
 
-//implementing database and connecting
 impl MongoDatabase {
     pub async fn init(settings: &config::Config) -> Self {
 
@@ -19,7 +18,6 @@ impl MongoDatabase {
         let host_prod = settings.get::<String>("mongo.DB_HOST").unwrap();
         let db_name = settings.get::<String>("mongo.DB_NAME").unwrap();
         let url: String;
-        // let url_ref: &str;
 
         match environment.as_str() {
            "TEST" => {
@@ -29,8 +27,6 @@ impl MongoDatabase {
                 url = format!("mongodb://{}:{}@{}:{}/{}?directConnection=true", user, password, host_prod, port, db_name);
             }
         }
-
-        // url_ref = &url;
 
         let client = Client::with_uri_str(&url).await.unwrap();
         let db = client.database(db_name.as_str());

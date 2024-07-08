@@ -18,27 +18,19 @@ pub struct CustomerModel {
     pub password: String,
     pub salt: String,
     pub session_id: String,
-    
     #[serde(default = "default_false")]
     pub phone_verified: bool,
-
     #[serde(default = "default_false")]
     pub email_verified: bool,
-
     pub is_subscribed_on_bvirtual: bool,
-    
     #[serde(default = "default_false")]
     pub is_account_active: bool,
-    
     #[serde(default = "default_false")]
     pub is_blocked: bool,
-    
-    #[serde(default = "now")]
+    #[serde(default = "now", skip_serializing)]
     pub created_at: DateTime,
-    
-    #[serde(default = "now")]
+    #[serde(default = "now", skip_serializing)]
     pub updated_at: DateTime,
-    
     #[serde(default)]
     pub last_seen: Option<DateTime>,
 }
