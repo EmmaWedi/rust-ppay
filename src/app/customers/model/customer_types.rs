@@ -21,6 +21,11 @@ pub struct SiginCustomerRequestModel {
     pub password: String
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct IdPathModel {
+    pub id: String
+}
+
 //Response Models
 #[derive(Serialize)]
 pub  struct AddCustomerResponseModel<T> {
@@ -29,13 +34,13 @@ pub  struct AddCustomerResponseModel<T> {
     pub code: u16,
     pub status: bool,
     pub message: String,
-    pub data: Vec<T>
+    pub data: DataOut<T>
 }
 
 #[derive(Serialize)]
 pub enum DataOut<T> {
-    Array(Vec<T>),
-    Object(HashMap<String, T>),
+    Results(Vec<T>),
+    Result(HashMap<String, T>),
 }
 
 #[derive(Serialize)]

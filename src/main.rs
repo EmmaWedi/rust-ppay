@@ -46,6 +46,11 @@ async fn main() -> std::io::Result<()> {
     let _port = port.clone();
     let _host = host.clone();
 
+    let state = web::Data::new(AppState {
+        config: settings.clone(),
+        mongo_db: db_conn.clone(),
+    });
+
     HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin()
@@ -62,10 +67,7 @@ async fn main() -> std::io::Result<()> {
         log::info!("==> 🚀 listening at {}:{}", host, port);
 
         App::new()
-            .app_data(web::Data::new(AppState {
-                config: settings.clone(),
-                mongo_db: db_conn.clone(),
-            }))
+            .app_data(state.clone())
             .wrap(
                 ErrorHandlers::new()
                     .handler(http::StatusCode::METHOD_NOT_ALLOWED, error::render_405)
@@ -75,7 +77,7 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(Logger::default())
             .wrap(cors)
-            .configure(app::customers::routes::route::route)
+            .configure(|cfg| app::customers::routes::route::route(cfg, state.clone()))
             .configure(app::health::routes::route::route)
     })
     .bind(format!("{}:{}", _host, _port))?

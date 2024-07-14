@@ -127,7 +127,7 @@ pub async fn block_customer(state: &web::Data<AppState>, id: &str) -> Result<Upd
             },
             doc! {
                 "$set": doc! {
-                    "is_blocked": true
+                    "is_blocked": false
                 }
             },
         )
