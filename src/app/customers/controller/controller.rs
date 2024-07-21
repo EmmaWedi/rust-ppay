@@ -144,7 +144,7 @@ pub async fn signin_customer(
 
 pub async fn block_customer_controller(params: web::Path<IdPathModel>, state: web::Data<AppState>) -> Result<HttpResponse, error::Error> {
     let id = validator::uuid(&params.id, "Id")?;
-
+    
     let result = block_customer(&state, &id).await;
 
     match result {

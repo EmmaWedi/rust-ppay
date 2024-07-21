@@ -58,8 +58,8 @@ where
         let service = self.service.clone();
         let state = self.state.clone();
         let (http_request, payload) = req.into_parts();
-
-        let fut = async move {
+        log::info!("1");
+        Box::pin(async move {
             match verify_jwt(&http_request, &state).await {
                 Ok(claims) => {
                     let req = ServiceRequest::from_parts(http_request, payload);
@@ -68,8 +68,6 @@ where
                 }
                 Err(_) => Err(actix_web::error::ErrorUnauthorized("Unauthorized")),
             }
-        };
-
-        Box::pin(fut)
+        })
     }
 }

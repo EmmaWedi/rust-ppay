@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use actix_cors::Cors;
 use actix_http::header::{self, HeaderName};
-use actix_web::{http, middleware::{ErrorHandlers, Logger}, web::{self, Data}, App, HttpServer, Result};
+use actix_web::{http, middleware::{ErrorHandlers, Logger, NormalizePath}, web::{self, Data}, App, HttpServer, Result};
 use setup::databases::mongo::MongoDatabase;
 use config::{Config as ConfigLoader, File, FileFormat};
 use libs::error;
@@ -76,6 +76,7 @@ async fn main() -> std::io::Result<()> {
                     .handler(http::StatusCode::BAD_REQUEST, error::render_400),
             )
             .wrap(Logger::default())
+            .wrap(NormalizePath::trim())
             .wrap(cors)
             .configure(|cfg| app::customers::routes::route::route(cfg, state.clone()))
             .configure(app::health::routes::route::route)

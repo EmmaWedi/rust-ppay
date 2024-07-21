@@ -60,12 +60,12 @@ pub fn parse_token(token: &str, state: &web::Data<AppState>) -> Result<Claims, e
 
     let jwt_key = state.config.get::<String>("jwt.secret_key").unwrap();
 
-    let token = match decode::<Claims>(&token, &DecodingKey::from_secret(jwt_key.as_ref()), &Validation::default()) {
+    let token_res = match decode::<Claims>(&token, &DecodingKey::from_secret(jwt_key.as_ref()), &Validation::new(Algorithm::HS512)) {
         Ok(v) => v,
         Err(_) => return Err(error::new_error(1001, "Authentication failure", 401))
     };
 
-    let claims = token.claims;
+    let claims = token_res.claims;
 
     Ok(claims)
 }
