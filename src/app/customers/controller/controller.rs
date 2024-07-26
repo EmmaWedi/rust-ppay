@@ -1,12 +1,11 @@
-use std::collections::HashMap;
-
 use actix_web::{web, HttpResponse};
+use serde_json::json;
 
 use crate::{
     app::customers::{
         dto::dto::{block_customer, create_customer_dto, get_customer_by_email, update_session},
         model::customer_types::{
-            AddCustomerModel, AddCustomerRequestModel, AddCustomerResponseModel, CustomerToReturnModel, DataOut, HttpClientErrorResponse, HttpClientSuccessResponse, IdPathModel, SiginCustomerRequestModel
+            AddCustomerModel, AddCustomerRequestModel, AddCustomerResponseModel, CustomerToReturnModel, HttpClientResponse, IdPathModel, SiginCustomerRequestModel
         },
     },
     libs::{
@@ -29,11 +28,11 @@ pub async fn create_customer(
     let mobile = validator::mobile(&payload.phone, "Phone")?;
 
     if let Ok(customer) = get_customer_by_email(&state, &email).await {
-        return Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
+        return Ok(HttpResponse::Ok().json(HttpClientResponse {
             code: 2002,
             status: false,
             message: format!("Customer With Email {} Exists", customer.email),
-            data: vec![],
+            data: json!({}),
         }));
     }
 
@@ -58,23 +57,20 @@ pub async fn create_customer(
 
             let token_addr = create_jwt(session.clone(), "user".to_string(), &state).await;
 
-            let mut map_res = HashMap::new();
-            map_res.insert("matched".to_string(), res);
-
             Ok(HttpResponse::Ok().json(AddCustomerResponseModel {
                 id: session,
                 token: token_addr.token,
                 code: 2000,
                 status: true,
                 message: "Success".to_string(),
-                data: DataOut::Result(map_res),
+                data: json!(res),
             }))
         }
-        Err(_) => Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
+        Err(_) => Ok(HttpResponse::Ok().json(HttpClientResponse {
             code: 2002,
             status: false,
             message: "Could not register".to_string(),
-            data: vec![],
+            data: json!({}),
         })),
     }
 }
@@ -95,11 +91,11 @@ pub async fn signin_customer(
             let valid_password = validate_password(&password, &salt, &customer.password);
 
             if !valid_password {
-                return Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
+                return Ok(HttpResponse::Ok().json(HttpClientResponse {
                     code: 2002,
                     status: false,
                     message: "Invalid Credentials".to_string(),
-                    data: vec![],
+                    data: json!({}),
                 }));
             }
 
@@ -121,23 +117,20 @@ pub async fn signin_customer(
                 last_seen: customer.last_seen.to_string()
             };
 
-            let mut map_res = HashMap::new();
-            map_res.insert("customer".to_string(), cus);
-
             Ok(HttpResponse::Ok().json(AddCustomerResponseModel {
                 id: session,
                 token: token_addr.token,
                 code: 2000,
                 status: true,
                 message: "Success".to_string(),
-                data: DataOut::Result(map_res),
+                data: json!(cus),
             }))
         }
-        Err(_) => Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
+        Err(_) => Ok(HttpResponse::Ok().json(HttpClientResponse {
             code: 2002,
             status: false,
             message: "Wrong Credentials".to_string(),
-            data: vec![],
+            data: json!({}),
         })),
     }
 }
@@ -150,22 +143,18 @@ pub async fn block_customer_controller(params: web::Path<IdPathModel>, state: we
     match result {
         Ok(res) => {
 
-            let mut map_res = HashMap::new();
-            map_res.insert("matched".to_string(), res.matched_count);
-            map_res.insert("modified".to_string(), res.modified_count);
-
-            Ok(HttpResponse::Ok().json(HttpClientSuccessResponse {
+            Ok(HttpResponse::Ok().json(HttpClientResponse {
                 code: 2000,
                 status: true,
                 message: "Success".to_string(),
-                data: DataOut::Result(map_res)
+                data: json!(res)
             }))        
         }
-        Err(_) => Ok(HttpResponse::Ok().json(HttpClientErrorResponse {
+        Err(_) => Ok(HttpResponse::Ok().json(HttpClientResponse {
             code: 2002,
             status: false,
             message: "Wrong Credentials".to_string(),
-            data: vec![],
+            data: json!({}),
         }))
     }
 }

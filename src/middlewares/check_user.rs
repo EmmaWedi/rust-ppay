@@ -63,7 +63,7 @@ where
 
         let service = self.service.clone();
         let state = self.state.clone();
-        log::info!("2");
+        
         let fut = async move {
             match get_customer(&state, user_id.as_str()).await {
                 Ok(customer) => {

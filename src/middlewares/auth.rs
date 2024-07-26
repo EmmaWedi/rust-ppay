@@ -58,7 +58,7 @@ where
         let service = self.service.clone();
         let state = self.state.clone();
         let (http_request, payload) = req.into_parts();
-        log::info!("1");
+       
         Box::pin(async move {
             match verify_jwt(&http_request, &state).await {
                 Ok(claims) => {

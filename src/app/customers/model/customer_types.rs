@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use mongodb::bson::{oid::ObjectId, DateTime};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::app::customers::model::customer::CustomerModel;
 
@@ -28,35 +27,21 @@ pub struct IdPathModel {
 
 //Response Models
 #[derive(Serialize)]
-pub  struct AddCustomerResponseModel<T> {
+pub  struct AddCustomerResponseModel {
     pub id: String,
     pub token: String,
     pub code: u16,
     pub status: bool,
     pub message: String,
-    pub data: DataOut<T>
+    pub data: Value
 }
 
 #[derive(Serialize)]
-pub enum DataOut<T> {
-    Results(Vec<T>),
-    Result(HashMap<String, T>),
-}
-
-#[derive(Serialize)]
-pub struct HttpClientErrorResponse {
+pub struct HttpClientResponse {
     pub code: u16,
     pub status: bool,
     pub message: String,
-    pub data: Vec<()>
-}
-
-#[derive(Serialize)]
-pub struct HttpClientSuccessResponse<T> {
-    pub code: u16,
-    pub status: bool,
-    pub message: String,
-    pub data: DataOut<T>
+    pub data: Value
 }
 
 //Database Models
